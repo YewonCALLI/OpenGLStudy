@@ -9,7 +9,7 @@ out vec2 texCoord;
 
 uniform float scale;
 
-unform mat4 camMatrix;
+uniform mat4 camMatrix;
 
 void main()
 {
