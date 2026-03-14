@@ -1,26 +1,29 @@
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include <iostream>
 #include <cmath>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stb/stb_image.h>
+
+#include "header/Texture.h"
 #include "header/shaderClass.h"
 #include "header/VAO.h"
 #include "header/VBO.h"
 #include "header/EBO.h"
 
 GLfloat vertices[] =
-{
-	-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-	-0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-	0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-	0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f
-};
+	{
+		-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f};
 
 GLuint indices[] =
-{
-	0, 2, 1,
-	0, 3, 2
-};
+	{
+		0, 2, 1,
+		0, 3, 2};
 
 int main()
 {
@@ -47,42 +50,49 @@ int main()
 	VAO1.Bind();
 	VBO VBO1(vertices, sizeof(vertices));
 	EBO EBO1(indices, sizeof(indices));
-	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
-	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void *)0);
+	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+	VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(float), (void *)(6 * sizeof(float)));
 	VAO1.Unbind();
 	VBO1.Unbind();
 	EBO1.Unbind();
 
 	GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");
 
+	std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
+	std::string texPath = "/OpenGLStudy/dependencies/textures/";
 	// Texture
-	int widthImg, heightImg, numColCh;
-	unsigned char *bytes = stbi_load("./textures/pop_cat.png", &widthImg, &heightImg, &numColCh, 0);
+	Texture popCat((parentDir + texPath + "pop_cat.png").c_str(), GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+	popCat.texUnit(shaderProgram, "tex0", 0);
 
-	GLuint texture;
-	glGenTextures(1, &texture);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	// Texture
+	// int widthImg, heightImg, numColCh;
+	// stbi_set_flip_vertically_on_load(true);
+	// unsigned char *bytes = stbi_load("./dependencies/textures/pop_cat.png", &widthImg, &heightImg, &numColCh, 0);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	// GLuint texture;
+	// glGenTextures(1, &texture);
+	// glActiveTexture(GL_TEXTURE0);
+	// glBindTexture(GL_TEXTURE_2D, texture);
 
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	//float flatColor[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-	//glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, flatColor);
+	// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthImg, heightImg, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytes);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	// float flatColor[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+	// glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, flatColor);
 
-	stbi_image_free(bytes);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	// glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthImg, heightImg, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytes);
+	// glGenerateMipmap(GL_TEXTURE_2D);
 
-	GLuint tex0Uni = glGetUniformLocation(shaderProgram.ID, "tex0");
-	shaderProgram.Activate();
-	glUniform1i(tex0Uni, 0);
+	// stbi_image_free(bytes);
+	// glBindTexture(GL_TEXTURE_2D, 0);
+
+	// GLuint tex0Uni = glGetUniformLocation(shaderProgram.ID, "tex0");
+	// shaderProgram.Activate();
+	// glUniform1i(tex0Uni, 0);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -90,7 +100,7 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 		shaderProgram.Activate();
 		glUniform1f(uniID, 0.5f);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		popCat.Bind();
 		VAO1.Bind();
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glfwSwapBuffers(window);
@@ -100,7 +110,7 @@ int main()
 	VAO1.Delete();
 	VBO1.Delete();
 	EBO1.Delete();
-	glDeleteTextures(1, &texture);
+	popCat.Delete();
 	shaderProgram.Delete();
 	glfwDestroyWindow(window);
 	glfwTerminate();
